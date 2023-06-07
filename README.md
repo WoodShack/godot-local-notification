@@ -8,9 +8,11 @@ This is a module for [Godot Game Engine](http://godotengine.org/) which add loca
 
 2. Enable **Custom Build** for using in Android.
 
-3. Set Android Target SDK to 33 or higher.
+3. Set Android Target SDK to 33 or higher in the Android export menu.
 
-4. Add 'android.permission.POST_NOTIFICATIONS' and 'android.permission.SCHEDULE_EXACT_ALARM' as custom permissions.
+4. Add `android.permission.POST_NOTIFICATIONS` and `android.permission.SCHEDULE_EXACT_ALARM` as custom permissions in the Android export menu.
+
+5. Enable Local Notification Plugin in the Android export menu.
 
 ## Usage
 
