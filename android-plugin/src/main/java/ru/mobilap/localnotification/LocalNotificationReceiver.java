@@ -11,27 +11,37 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import androidx.core.app.NotificationCompat;
+
+import android.os.Build;
+import android.util.Base64;
 import android.util.Log;
 import android.net.Uri;
 import android.media.RingtoneManager;
 import org.godotengine.godot.Godot;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 public class LocalNotificationReceiver extends BroadcastReceiver {
-    private static final String TAG = "Notification";
+    private static final String TAG = "Godot NotificationR";
     public static final String NOTIFICATION_CHANNEL_ID = "10001" ;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        int notificationId = intent.getIntExtra("notification_id", 0);
-        String message = intent.getStringExtra("message");
-        String title = intent.getStringExtra("title");
+        String action = intent.getAction();
+        String[] actionList = action.split(",");
+
+        int notificationId = Integer.parseInt(decode(actionList[0]));
+        String message = decode(actionList[1]);
+        String title = decode(actionList[2]);
         Log.i(TAG, "Receive notification: "+message);
 
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ) {
             int importance = NotificationManager.IMPORTANCE_HIGH ;
-            NotificationChannel notificationChannel = new NotificationChannel( NOTIFICATION_CHANNEL_ID , "NOTIFICATION_CHANNEL_NAME" , importance) ;
+            NotificationChannel notificationChannel = new NotificationChannel( NOTIFICATION_CHANNEL_ID , "Local Notification" , importance) ;
             notificationChannel.setShowBadge(true);
             //builder.setChannelId( NOTIFICATION_CHANNEL_ID ) ;
             manager.createNotificationChannel(notificationChannel) ;
@@ -47,7 +57,13 @@ public class LocalNotificationReceiver extends BroadcastReceiver {
         
         Intent intent2 = new Intent(context, appClass);
         intent2.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        PendingIntent pendingIntent;
+        if(android.os.Build.VERSION.SDK_INT  >= Build.VERSION_CODES.M) {
+            pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         int iconID = context.getResources().getIdentifier("icon", "mipmap", context.getPackageName());
         int notificationIconID = context.getResources().getIdentifier("notification_icon", "mipmap", context.getPackageName());
@@ -73,18 +89,21 @@ public class LocalNotificationReceiver extends BroadcastReceiver {
             builder.setColor(context.getResources().getColor(colorID));
         builder.setContentIntent(pendingIntent);
         builder.setNumber(1);
-        //builder.addAction();
-        //builder.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.bomb3));
         builder.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
-        //long[] pattern = {10,10};
-        //builder.setVibrate(pattern);
         builder.setPriority(NotificationCompat.PRIORITY_HIGH);
 
         Notification notification = builder.build();
         notification.sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-        //notification.vibrate = pattern;
 
         manager.notify(notificationId, notification);
     }
 
+    private String decode(String base64){
+        try {
+            return new String(Base64.decode(base64, Base64.DEFAULT), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 }

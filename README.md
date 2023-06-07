@@ -26,8 +26,6 @@ If you defined `repeating_interval` the notification will be fired in a loop unt
 Show notification daily at specific hour and minute (in 24 hour format).
 You can overide the notification with new time, or cancel it with tag and register a new one.
 
-*Need help*: Currently just support ios, need help on Android
-
 ### cancel(tag: int)
 
 Cancel previously created notification.

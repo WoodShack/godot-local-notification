@@ -1,13 +1,34 @@
 package ru.mobilap.localnotification;
 
+import static java.lang.Thread.sleep;
+
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.AlarmManager;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.content.Intent;
+import android.os.Looper;
+import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.net.Uri;
 import android.view.View;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.List;
 import java.util.Arrays;
@@ -25,6 +46,7 @@ import org.godotengine.godot.plugin.SignalInfo;
 
 public class LocalNotification extends GodotPlugin {
 
+    private Activity act;
     private final String TAG = LocalNotification.class.getName();
     private Dictionary notificationData = new Dictionary();
     private String action = null;
@@ -47,6 +69,7 @@ public class LocalNotification extends GodotPlugin {
     public List<String> getPluginMethods() {
         return Arrays.asList(
                 "init",
+                "requestPermission",
                 "showLocalNotification",
                 "showRepeatingNotification",
                 "cancelLocalNotification",
@@ -70,6 +93,7 @@ public class LocalNotification extends GodotPlugin {
 
     @Override
     public View onMainCreate(Activity activity) {
+        act = activity;
         return null;
     }
 
@@ -86,7 +110,16 @@ public class LocalNotification extends GodotPlugin {
         return true;
     }
 
+    public void requestPermission() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            if (act.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                act.requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},101);
+            }
+        }
+    }
+
     public void showLocalNotification(String message, String title, int interval, int tag) {
+        requestPermission();
         if(interval <= 0) return;
         Log.d(TAG, "showLocalNotification: "+message+", "+Integer.toString(interval)+", "+Integer.toString(tag));
         PendingIntent sender = getPendingIntent(message, title, tag);
@@ -104,6 +137,7 @@ public class LocalNotification extends GodotPlugin {
     }
     
     public void showRepeatingNotification(String message, String title, int interval, int tag, int repeat_duration) {
+        requestPermission();
         if(interval <= 0) return;
         Log.d(TAG, "showRepeatingNotification: "+message+", "+Integer.toString(interval)+", "+Integer.toString(tag)+" Repeat after: "+Integer.toString(repeat_duration));
         PendingIntent sender = getPendingIntent(message, title, tag);
@@ -140,12 +174,29 @@ public class LocalNotification extends GodotPlugin {
     // Internal methods
 
     private PendingIntent getPendingIntent(String message, String title, int tag) {
-        Intent i = new Intent(getActivity().getApplicationContext(), LocalNotificationReceiver.class);
+        Intent i = new Intent(act.getApplicationContext(), LocalNotificationReceiver.class);
         i.putExtra("notification_id", tag);
         i.putExtra("message", message);
         i.putExtra("title", title);
-        PendingIntent sender = PendingIntent.getBroadcast(getActivity(), tag, i, PendingIntent.FLAG_UPDATE_CURRENT);
-        return sender;
+
+        String action = "";
+        try {
+            String tagBase64 = Base64.encodeToString(String.valueOf(tag).getBytes("UTF-8"), Base64.DEFAULT);
+            String messageBase64 = Base64.encodeToString(message.getBytes("UTF-8"), Base64.DEFAULT);
+            String titleBase64 = Base64.encodeToString(title.getBytes("UTF-8"), Base64.DEFAULT);
+            action = tagBase64+","+messageBase64+","+titleBase64;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        i.setAction(action);
+        if(android.os.Build.VERSION.SDK_INT  >= Build.VERSION_CODES.M) {
+            PendingIntent sender = PendingIntent.getBroadcast(act, tag, i, PendingIntent.FLAG_IMMUTABLE);
+            return sender;
+        } else {
+            PendingIntent sender = PendingIntent.getBroadcast(act, tag, i, PendingIntent.FLAG_UPDATE_CURRENT);
+            return sender;
+        }
     }
 
     @Override public void onMainActivityResult (int requestCode, int resultCode, Intent data)
