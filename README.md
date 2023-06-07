@@ -10,6 +10,10 @@ This is a module for [Godot Game Engine](http://godotengine.org/) which add loca
 
 3. Enable **Custom Build** for using in Android.
 
+4. Set Android Target SDK to 33 or higher.
+
+5. Add 'android.permission.POST_NOTIFICATIONS' and 'android.permission.SCHEDULE_EXACT_ALARM' as custom permissions.
+
 ## Usage
 
 Add wrapper `scripts/localnotification.gd` into autoloading list in your project. So you can use it everywhere in your code.
@@ -36,7 +40,7 @@ Cancel all pending notifications (implemented for iOS only).
 
 ### init()
 
-Request permission for notifications (iOS only).
+Request permission for notifications (iOS and Android 13+).
 
 ### is_inited() -> bool
 
