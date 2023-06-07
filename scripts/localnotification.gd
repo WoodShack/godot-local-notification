@@ -67,8 +67,19 @@ func show_daily(message: String, title: String, hour: int, minute: int, tag: int
 			_ln.showRepeatingNotification(message, title, hour, minute, tag)
 
 func cancel(tag: int = 1) -> void:
+	if OS.get_name() == 'Android':
+		printerr("Use cancelAndroid instead")
+		return
+		
 	if _ln != null:
 		_ln.cancelLocalNotification(tag)
+		
+func cancelAndroid(message: String, title: String, tag: int = 1) -> void:
+	if OS.get_name() != 'Android':
+		return
+	
+	if _ln != null:
+		_ln.cancelLocalNotification(message,title,tag)
 
 func cancel_all() -> void:
 	if _ln != null:

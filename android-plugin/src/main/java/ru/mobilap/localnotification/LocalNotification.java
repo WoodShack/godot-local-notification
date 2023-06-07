@@ -154,9 +154,9 @@ public class LocalNotification extends GodotPlugin {
         }
     }
 
-    public void cancelLocalNotification(int tag) {
+    public void cancelLocalNotification(String message, String title, int tag) {
         AlarmManager am = (AlarmManager)getActivity().getSystemService(getActivity().ALARM_SERVICE);
-        PendingIntent sender = getPendingIntent("", "", tag);
+        PendingIntent sender = getPendingIntent(message, title, tag);
         am.cancel(sender);
     }
 
