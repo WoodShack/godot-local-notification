@@ -2,21 +2,19 @@
 
 This is a module for [Godot Game Engine](http://godotengine.org/) which add local and remote notification feature for iOS and Android. 
 
-## Installation
+## Installation Godot 3.5
 
-1. At first you need [NativeLib-CLI](https://github.com/DrMoriarty/nativelib-cli) or [NativeLib Addon](https://github.com/DrMoriarty/nativelib).
+1. Download the latest release and move the files into your godot project
 
-2. Make `nativelib -i local-notification` in your project directory if you are using CLI. Find `LOCAL-NOTIFICATION` in plugins list and press "Install" button if you are using GUI Addon.
+2. Enable **Custom Build** for using in Android.
 
-3. Enable **Custom Build** for using in Android.
+3. Set Android Target SDK to 33 or higher.
 
-4. Set Android Target SDK to 33 or higher.
-
-5. Add 'android.permission.POST_NOTIFICATIONS' and 'android.permission.SCHEDULE_EXACT_ALARM' as custom permissions.
+4. Add 'android.permission.POST_NOTIFICATIONS' and 'android.permission.SCHEDULE_EXACT_ALARM' as custom permissions.
 
 ## Usage
 
-Add wrapper `scripts/localnotification.gd` into autoloading list in your project. So you can use it everywhere in your code.
+Add `localnotification.gd` into autoloading list in your project. So you can use it everywhere in your code.
 
 ## API
 
