@@ -104,3 +104,11 @@ That’s all. Sending notifications processed by your server, receiving notifica
 ## Troubleshooting
 
 If the notification doesn't appear, make sure you're not trying to display it while your game is in the foreground. In iOS, apps can only show notifications if they are in the background. This implies that you must use `interval` > 0.
+
+## iOS Compile
+
+1) [Download](https://github.com/godotengine/godot-cpp/tags) godot-cpp V3.2.3 and put in `/ios-framework/godot-cpp`
+2) [Download](https://github.com/godotengine/godot-headers/tags) godot-headers V3.2.3 put in `/ios-framework/godot-cpp/godot-headers`
+3) in `/ios-framework/godot-cpp` run `scons platform=ios generate_bindings=yes target=release`
+4) in` xcode/Targets/gdnative_ios/General/Frameworks and Libraries` remove `lgodot-cpp.ios.release` and add `/ios-framework/godot-cpp/bin/libgodot-cpp.ios.release.arm64.a`
+5) in `/ios-framework/` run `./xcframework_build.sh`
